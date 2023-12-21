@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Offcanvas, Button, Modal } from "react-bootstrap";
+import { Table, Offcanvas, Button, Modal, Accordion } from "react-bootstrap";
 import { AddRecord } from "../components/AddRecord";
 import { EditRecord } from "../components/EditRecord";
 import { AgGridReact } from "ag-grid-react"; // React Grid Logic
@@ -12,6 +12,7 @@ import TextField from "@mui/material/TextField";
 
 export const TableView = () => {
   const [data, setData] = useState<any>([]);
+  const [sumData, setSumData] = useState<any>();
 
   const getAllRecordNames = async () => {
     await axios.get(BASE_URL + "/recordNames").then((response) => {
@@ -28,8 +29,16 @@ export const TableView = () => {
     });
   };
 
+  const getSumData = async () => {
+    await axios.get(BASE_URL + "/getForcastedResults").then((response) => {
+      setSumData(response.data);
+      console.log(response.data);
+    });
+  };
+
   useEffect(() => {
     getAllRecordNames();
+    getSumData();
   }, []);
 
   const hasDuplicates = () => {
@@ -53,16 +62,13 @@ export const TableView = () => {
       });
       setData(uniqueData);
     }
-    console.log(data);
   }, [data]);
 
   const [showCanvas, setShowCanvas] = useState<boolean>(false);
   const [canvasItem, setCanvasItem] = useState<"ADD" | "EDIT">("ADD");
-  const [showModal, setShowModal] = useState<boolean>(false);
   const handleAddClick = () => {
     setCanvasItem("ADD");
     setShowCanvas(true);
-    setShowModal(false);
   };
 
   const handleEditClick = (id: number) => {
@@ -73,6 +79,9 @@ export const TableView = () => {
   const handleClose = () => {
     setShowCanvas(false);
   };
+  useEffect(() => {
+    // console.log(sumData.grandTotalByTimeframe);
+  });
 
   return (
     <>
@@ -83,23 +92,26 @@ export const TableView = () => {
             <button
               type="button"
               className="btn btn-dark"
-              onClick={() => setShowModal(true)}
+              onClick={handleAddClick}
             >
-              Add
+              Add Record
             </button>
           </div>
           {data.map((record: any, index: number) => (
-            <div key={index}>
-              <TextField
-                label="Record Name"
-                id="outlined-size-small"
-                value={record.recordName}
-                size="small"
-                className="mb-2"
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
+            <div key={index} className="record-details">
+              <div>
+                <TextField
+                  label="Record Name"
+                  id="outlined-size-small"
+                  value={record.recordName}
+                  size="small"
+                  className="mb-2"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <button className="btn btn-primary mx-2">Add Timeframe</button>
+              </div>
               <Table bordered hover>
                 <thead className="table-dark">
                   <tr>
@@ -117,7 +129,11 @@ export const TableView = () => {
                 </thead>
                 <tbody>
                   {record.recordList?.map((row: any, index: number) => (
-                    <tr key={index} onClick={(e) => handleEditClick(row.id)} style={{cursor:'pointer'}}>
+                    <tr
+                      key={index}
+                      onClick={(e) => handleEditClick(row.id)}
+                      style={{ cursor: "pointer" }}
+                    >
                       {row.fields?.map((field: any, index: number) => (
                         <td key={index}>{field.value}</td>
                       ))}
@@ -128,15 +144,109 @@ export const TableView = () => {
                   ))}
                 </tbody>
               </Table>
+              <Accordion>
+                <Accordion.Item eventKey="0">
+                  <Accordion.Header>
+                    Grouped Total by Timeframe
+                  </Accordion.Header>
+                  <Accordion.Body className="p-0">
+                    <Table bordered className="mb-0">
+                      <thead className="table-info ">
+                        <tr>
+                          <th>Group</th>
+                          <th>Timeframe</th>
+                          <th>Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sumData &&
+                          Object.keys(
+                            sumData.groupedTotalByTimeframe[record.recordName]
+                          ).map((group, index) => {
+                            const ob =
+                              sumData.groupedTotalByTimeframe[
+                                record.recordName
+                              ];
+                            return Object.keys(ob[group]).map(
+                              (timeframe, index) => (
+                                <tr key={index}>
+                                  <td>{group}</td>
+                                  <td>{timeframe}</td>
+                                  <td>{ob[group][timeframe]}</td>
+                                </tr>
+                              )
+                            );
+                          })}
+                      </tbody>
+                    </Table>
+                  </Accordion.Body>
+                </Accordion.Item>
+                <Accordion.Item eventKey="1">
+                  <Accordion.Header>Record Total by Timeframe</Accordion.Header>
+                  <Accordion.Body className="p-0">
+                    <Table bordered className="mb-0">
+                      <thead className="table-info ">
+                        <tr>
+                          <th>Timeframe</th>
+                          <th>Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sumData &&
+                          Object.keys(
+                            sumData.recordNameTotalByTimeframe[
+                              record.recordName
+                            ]
+                          ).map((timeframe, index) => {
+                            const obj =
+                              sumData.recordNameTotalByTimeframe[
+                                record.recordName
+                              ];
+                            return (
+                              <tr key={index}>
+                                <td>{timeframe}</td>
+                                <td>{obj[timeframe]}</td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </Table>
+                  </Accordion.Body>
+                </Accordion.Item>
+              </Accordion>
             </div>
           ))}
+          <Table bordered>
+            <thead className="table-success">
+              <tr>
+                <th colSpan={2} className="text-center">
+                  Grand Total by Timeframe
+                </th>
+              </tr>
+              <tr>
+                <th>Timeframe</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sumData &&
+                Object.keys(sumData.grandTotalByTimeframe).map(
+                  (year, index) => (
+                    <tr key={index}>
+                      <td>{year}</td>
+                      <td>{sumData.grandTotalByTimeframe[year]}</td>
+                    </tr>
+                  )
+                )}
+            </tbody>
+          </Table>
         </div>
       </div>
       <Offcanvas
         backdrop="static"
         show={showCanvas}
         onHide={handleClose}
-        placement="end"
+        placement={canvasItem === "ADD" ? "end" : "start"}
       >
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>
@@ -147,26 +257,6 @@ export const TableView = () => {
           {canvasItem === "ADD" ? <AddRecord /> : <EditRecord />}
         </Offcanvas.Body>
       </Offcanvas>
-      <Modal
-        backdrop="static"
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        centered
-      >
-        <Modal.Header closeButton style={{ border: "none" }}></Modal.Header>
-        <Modal.Body className="p-0">
-          <h4 className="text-center">What do you want to add?</h4>
-          <div className="d-flex justify-content-center  mb-5">
-            <button
-              className="btn btn-primary mx-2 mt-4"
-              onClick={handleAddClick}
-            >
-              Add Record
-            </button>
-            <button className="btn btn-primary mx-2 mt-4">Add Timeframe</button>
-          </div>
-        </Modal.Body>
-      </Modal>
     </>
   );
 };
