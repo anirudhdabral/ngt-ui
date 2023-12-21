@@ -1,21 +1,30 @@
+import { TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Button, Col, FloatingLabel, Form, Row } from "react-bootstrap";
 
 export const AddRecord = () => {
+  const [isFormValid, setIsFormValid] = useState(false);
+
   const [dimensions, setDimensions] = useState([
     { dimensionName: "", dimensionValue: "" },
   ]);
+
   const [timeframes, setTimeframes] = useState([
-    { timeframeName: "", timeframeValue: "" },
+    { timeframeName: "", timeframeValue: 0 },
   ]);
+
   const handleAddDimension = () => {
     setDimensions([...dimensions, { dimensionName: "", dimensionValue: "" }]);
   };
-  const handleAddTimeframe = () => {
-    setTimeframes([...timeframes, { timeframeName: "", timeframeValue: "" }]);
+
+  const handleDeleteDimension = (index: number) => {
+    const updatedDimensions = [
+      ...dimensions.slice(0, index),
+      ...dimensions.slice(index + 1),
+    ];
+    setDimensions(updatedDimensions);
   };
-  const handleDeleteDimension = (index: number) => {};
-  const handleDeleteTimeframe = (index: number) => {};
+
   const handleDimensionNameChange = (e: any, index: number) => {
     let updatedDimensions = [...dimensions];
     updatedDimensions[index] = {
@@ -24,6 +33,19 @@ export const AddRecord = () => {
     };
     setDimensions(updatedDimensions);
   };
+
+  const handleAddTimeframe = () => {
+    setTimeframes([...timeframes, { timeframeName: "", timeframeValue: 0 }]);
+  };
+
+  const handleDeleteTimeframe = (index: number) => {
+    const updatedTimeframes = [
+      ...timeframes.slice(0, index),
+      ...timeframes.slice(index + 1),
+    ];
+    setTimeframes(updatedTimeframes);
+  };
+
   const handleTimeframeNameChange = (e: any, index: number) => {
     let updatedTimeframes = [...timeframes];
     updatedTimeframes[index] = {
@@ -32,6 +54,7 @@ export const AddRecord = () => {
     };
     setTimeframes(updatedTimeframes);
   };
+
   const handleTimeframeValueChange = (e: any, index: number) => {
     let updatedTimeframes = [...timeframes];
     updatedTimeframes[index] = {
@@ -40,6 +63,18 @@ export const AddRecord = () => {
     };
     setTimeframes(updatedTimeframes);
   };
+
+  const handleTimeframeDefaultValue = (e: any, index: number) => {
+    if (e.target.value.length == 0) {
+      let updatedTimeframes = [...timeframes];
+      updatedTimeframes[index] = {
+        ...updatedTimeframes[index],
+        timeframeValue: 0,
+      };
+      setTimeframes(updatedTimeframes);
+    }
+  };
+
   const handleDimensionValueChange = (e: any, index: number) => {
     let updatedDimensions = [...dimensions];
     updatedDimensions[index] = {
@@ -50,8 +85,13 @@ export const AddRecord = () => {
   };
 
   useEffect(() => {
-    console.log(dimensions);
-  }, [dimensions]);
+    let invalidForm =
+      dimensions.some(
+        (dim) =>
+          dim.dimensionName.length === 0 || dim.dimensionValue.length === 0
+      ) || timeframes.some((tim) => tim.timeframeName.length === 0);
+    setIsFormValid(!invalidForm);
+  }, [dimensions, timeframes]);
   return (
     <>
       <Form>
@@ -63,7 +103,11 @@ export const AddRecord = () => {
             <Form.Control />
           </Col>
         </Form.Group>
+        <hr />
         <div className="dimensions">
+          <div className="mb-3">
+            <small>Dimension Details</small>
+          </div>
           {dimensions.map((dimension, index) => (
             <Form.Group
               key={index}
@@ -72,25 +116,24 @@ export const AddRecord = () => {
               controlId="formPlaintextEmail"
             >
               <Col sm="5">
-                <FloatingLabel controlId="floatingInput" label="Dimension Name">
-                  <Form.Control
-                    type="text"
-                    placeholder="Dimension Name"
-                    onChange={(e) => handleDimensionNameChange(e, index)}
-                  />
-                </FloatingLabel>
+                <TextField
+                  id="outlined-basic"
+                  label="Name"
+                  variant="outlined"
+                  size="small"
+                  value={dimension.dimensionName}
+                  onChange={(e) => handleDimensionNameChange(e, index)}
+                />
               </Col>
               <Col sm="5">
-                <FloatingLabel
-                  controlId="floatingInput"
-                  label="Dimension Value"
-                >
-                  <Form.Control
-                    type="text"
-                    placeholder="Dimension Value"
-                    onChange={(e) => handleDimensionValueChange(e, index)}
-                  />
-                </FloatingLabel>
+                <TextField
+                  id="outlined-basic"
+                  label="Value"
+                  variant="outlined"
+                  size="small"
+                  value={dimension.dimensionValue}
+                  onChange={(e) => handleDimensionValueChange(e, index)}
+                />
               </Col>
               <Col sm="2" className="d-flex align-items-center ">
                 <Button
@@ -117,6 +160,9 @@ export const AddRecord = () => {
         </div>
         <hr />
         <div className="values">
+          <div className="mb-3">
+            <small>Timeframe Details</small>
+          </div>
           {timeframes.map((item, index) => (
             <Form.Group
               key={index}
@@ -125,25 +171,25 @@ export const AddRecord = () => {
               controlId="formPlaintextEmail"
             >
               <Col sm="5">
-                <FloatingLabel controlId="floatingInput" label="Timeframe Name">
-                  <Form.Control
-                    type="text"
-                    placeholder="Timeframe Name"
-                    onChange={(e) => handleTimeframeNameChange(e, index)}
-                  />
-                </FloatingLabel>
+                <TextField
+                  id="outlined-basic"
+                  label="Name"
+                  variant="outlined"
+                  size="small"
+                  value={item.timeframeName}
+                  onChange={(e) => handleTimeframeNameChange(e, index)}
+                />
               </Col>
               <Col sm="5">
-                <FloatingLabel
-                  controlId="floatingInput"
-                  label="Timeframe Value"
-                >
-                  <Form.Control
-                    type="text"
-                    placeholder="Timeframe Value"
-                    onChange={(e) => handleTimeframeValueChange(e, index)}
-                  />
-                </FloatingLabel>
+                <TextField
+                  id="outlined-basic"
+                  label="Value"
+                  variant="outlined"
+                  size="small"
+                  value={item.timeframeValue}
+                  onChange={(e) => handleTimeframeValueChange(e, index)}
+                  onBlur={(e) => handleTimeframeDefaultValue(e, index)}
+                />
               </Col>
               <Col sm="2" className="d-flex align-items-center">
                 <Button
@@ -167,6 +213,22 @@ export const AddRecord = () => {
               +
             </Button>
           </div>
+        </div>
+        <hr />
+        <div className="my-3">
+          {!isFormValid && (
+            <small className="text-danger" style={{ fontSize: 12 }}>
+              Please fill all the required fields
+            </small>
+          )}
+          <Button
+            variant="success"
+            className="w-100 my-1"
+            disabled={!isFormValid}
+            onClick={() => {}}
+          >
+            Submit
+          </Button>
         </div>
       </Form>
     </>
