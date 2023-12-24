@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { Table, Offcanvas, Button, Modal, Accordion } from "react-bootstrap";
-import { AddRecord } from "../components/AddRecord";
-import { EditRecord } from "../components/EditRecord";
-import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { Accordion, Offcanvas, Table } from "react-bootstrap";
+import { AddRecord } from "../components/AddRecord";
+import { EditRecord } from "../components/EditRecord";
 import { BASE_URL } from "../env";
-import { DataGrid } from "@mui/x-data-grid";
-import TextField from "@mui/material/TextField";
 
 export const TableView = () => {
   const [data, setData] = useState<any>([]);
   const [sumData, setSumData] = useState<any>();
+
+  const [actionId, setActionId] = useState<number>(-1);
+  const [actionRecordName, setActionRecordName] = useState<string>("");
 
   const getAllRecordNames = async () => {
     await axios.get(BASE_URL + "/recordNames").then((response) => {
@@ -32,7 +32,6 @@ export const TableView = () => {
   const getSumData = async () => {
     await axios.get(BASE_URL + "/getForcastedResults").then((response) => {
       setSumData(response.data);
-      console.log(response.data);
     });
   };
 
@@ -74,14 +73,22 @@ export const TableView = () => {
   const handleEditClick = (id: number) => {
     setCanvasItem("EDIT");
     setShowCanvas(true);
+    setActionId(id);
   };
 
   const handleClose = () => {
     setShowCanvas(false);
   };
-  useEffect(() => {
-    // console.log(sumData.grandTotalByTimeframe);
-  });
+
+  const handleAddTimeframe = (recordName: string) => {};
+
+  const handleRecordChangeCallback = () => {
+    // handleClose();
+    // getAllRecordNames();
+    // getSumData();
+
+    window.location.reload();
+  };
 
   return (
     <>
@@ -97,125 +104,98 @@ export const TableView = () => {
               Add Record
             </button>
           </div>
-          {data.map((record: any, index: number) => (
-            <div key={index} className="record-details">
-              <div>
-                <TextField
-                  label="Record Name"
-                  id="outlined-size-small"
-                  value={record.recordName}
-                  size="small"
-                  className="mb-2"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
-                <button className="btn btn-primary mx-2">Add Timeframe</button>
-              </div>
-              <Table bordered hover>
-                <thead className="table-dark">
-                  <tr>
-                    {record.recordList[0].fields?.map(
-                      (field: any, index: number) => (
-                        <th key={index}>{field.element}</th>
-                      )
-                    )}
-                    {record.recordList[0].values?.map(
-                      (field: any, index: number) => (
-                        <th key={index}>{field.element}</th>
-                      )
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {record.recordList?.map((row: any, index: number) => (
-                    <tr
-                      key={index}
-                      onClick={(e) => handleEditClick(row.id)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {row.fields?.map((field: any, index: number) => (
-                        <td key={index}>{field.value}</td>
-                      ))}
-                      {row.values?.map((field: any, index: number) => (
-                        <td key={index}>{field.value}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-              <Accordion>
-                <Accordion.Item eventKey="0">
-                  <Accordion.Header>
-                    Grouped Total by Timeframe
-                  </Accordion.Header>
-                  <Accordion.Body className="p-0">
-                    <Table bordered className="mb-0">
-                      <thead className="table-info ">
-                        <tr>
-                          <th>Group</th>
-                          <th>Timeframe</th>
-                          <th>Value</th>
+          <Accordion defaultActiveKey="0" className="mb-4">
+            {data.map((record: any, index: number) => (
+              <Accordion.Item eventKey={record.recordName} key={index}>
+                <Accordion.Header>{record.recordName}</Accordion.Header>
+                <Accordion.Body>
+                  <Table bordered hover>
+                    <thead className="table-dark">
+                      <tr>
+                        {record.recordList[0].fields?.map(
+                          (field: any, index: number) => (
+                            <th key={index}>{field.element}</th>
+                          )
+                        )}
+                        {record.recordList[0].values?.map(
+                          (field: any, index: number) => (
+                            <th key={index}>{field.element}</th>
+                          )
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {record.recordList?.map((row: any, index: number) => (
+                        <tr
+                          key={index}
+                          onClick={(e) => handleEditClick(row.id)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {row.fields?.map((field: any, index: number) => (
+                            <td key={index}>{field.value}</td>
+                          ))}
+                          {row.values?.map((field: any, index: number) => (
+                            <td key={index}>{field.value}</td>
+                          ))}
                         </tr>
-                      </thead>
-                      <tbody>
-                        {sumData &&
-                          Object.keys(
-                            sumData.groupedTotalByTimeframe[record.recordName]
-                          ).map((group, index) => {
-                            const ob =
-                              sumData.groupedTotalByTimeframe[
-                                record.recordName
-                              ];
-                            return Object.keys(ob[group]).map(
-                              (timeframe, index) => (
-                                <tr key={index}>
-                                  <td>{group}</td>
-                                  <td>{timeframe}</td>
+                      ))}
+                      {sumData &&
+                        Object.keys(
+                          sumData.groupedTotalByTimeframe[record.recordName]
+                        ).map((group, index) => {
+                          const ob =
+                            sumData.groupedTotalByTimeframe[record.recordName];
+                          return (
+                            <tr key={index} className="table-info">
+                              <td
+                                colSpan={
+                                  Object.keys(record.recordList[0].fields)
+                                    .length
+                                }
+                              >
+                                Total By Group: {group}
+                              </td>
+                              {Object.keys(ob[group]).map(
+                                (timeframe, index) => (
                                   <td>{ob[group][timeframe]}</td>
-                                </tr>
-                              )
-                            );
-                          })}
-                      </tbody>
-                    </Table>
-                  </Accordion.Body>
-                </Accordion.Item>
-                <Accordion.Item eventKey="1">
-                  <Accordion.Header>Record Total by Timeframe</Accordion.Header>
-                  <Accordion.Body className="p-0">
-                    <Table bordered className="mb-0">
-                      <thead className="table-info ">
-                        <tr>
-                          <th>Timeframe</th>
-                          <th>Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                                )
+                              )}
+                            </tr>
+                          );
+                        })}
+                      <tr className="table-info">
+                        <td
+                          colSpan={
+                            Object.keys(record.recordList[0].fields).length
+                          }
+                        >
+                          Record Total
+                        </td>
                         {sumData &&
                           Object.keys(
                             sumData.recordNameTotalByTimeframe[
                               record.recordName
                             ]
                           ).map((timeframe, index) => {
-                            const obj =
+                            const ob =
                               sumData.recordNameTotalByTimeframe[
                                 record.recordName
                               ];
-                            return (
-                              <tr key={index}>
-                                <td>{timeframe}</td>
-                                <td>{obj[timeframe]}</td>
-                              </tr>
-                            );
+                            return <td>{ob[timeframe]}</td>;
                           })}
-                      </tbody>
-                    </Table>
-                  </Accordion.Body>
-                </Accordion.Item>
-              </Accordion>
-            </div>
-          ))}
+                      </tr>
+                    </tbody>
+                  </Table>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleAddTimeframe(record.recordName)}
+                  >
+                    Add a new Timeframe
+                  </button>
+                </Accordion.Body>
+              </Accordion.Item>
+            ))}
+          </Accordion>
           <Table bordered>
             <thead className="table-success">
               <tr>
@@ -254,7 +234,11 @@ export const TableView = () => {
           </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          {canvasItem === "ADD" ? <AddRecord /> : <EditRecord />}
+          {canvasItem === "ADD" ? (
+            <AddRecord callback={handleRecordChangeCallback} />
+          ) : (
+            <EditRecord id={actionId} callback={handleRecordChangeCallback} />
+          )}
         </Offcanvas.Body>
       </Offcanvas>
     </>

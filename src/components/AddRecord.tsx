@@ -1,9 +1,16 @@
 import { TextField } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Button, Col, FloatingLabel, Form, Row } from "react-bootstrap";
+import { Button, Col, Form, Row } from "react-bootstrap";
+import axios from "axios";
+import { BASE_URL } from "../env";
 
-export const AddRecord = () => {
+type Props={
+  callback:any
+}
+
+export const AddRecord = (props:Props) => {
   const [isFormValid, setIsFormValid] = useState(false);
+  const [recordName, setRecordName] = useState<string>("");
 
   const [dimensions, setDimensions] = useState([
     { dimensionName: "", dimensionValue: "" },
@@ -89,9 +96,30 @@ export const AddRecord = () => {
       dimensions.some(
         (dim) =>
           dim.dimensionName.length === 0 || dim.dimensionValue.length === 0
-      ) || timeframes.some((tim) => tim.timeframeName.length === 0);
+      ) ||
+      timeframes.some((tim) => tim.timeframeName.length === 0) ||
+      recordName.length == 0;
     setIsFormValid(!invalidForm);
   }, [dimensions, timeframes]);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    let record: any = {};
+    record.recordName = recordName;
+    let fields: any = [];
+    let values: any = [];
+    for (const item of dimensions) {
+      fields.push({ element: item.dimensionName, value: item.dimensionValue });
+    }
+    for (const item of timeframes) {
+      values.push({ element: item.timeframeName, value: item.timeframeValue });
+    }
+    record.fields = fields;
+    record.values = values;
+    await axios.post(BASE_URL + "/addRecord", record).then((response) => {
+      props.callback()
+    });
+  };
   return (
     <>
       <Form>
@@ -100,7 +128,10 @@ export const AddRecord = () => {
             Record Name
           </Form.Label>
           <Col sm="7">
-            <Form.Control />
+            <Form.Control
+              value={recordName}
+              onChange={(e) => setRecordName(e.target.value)}
+            />
           </Col>
         </Form.Group>
         <hr />
@@ -225,7 +256,7 @@ export const AddRecord = () => {
             variant="success"
             className="w-100 my-1"
             disabled={!isFormValid}
-            onClick={() => {}}
+            onClick={(e) => handleSubmit(e)}
           >
             Submit
           </Button>
