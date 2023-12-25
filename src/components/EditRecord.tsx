@@ -8,6 +8,7 @@ type Props = {
   id: number;
   callback: any;
 };
+
 export const EditRecord = (props: Props) => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [recordName, setRecordName] = useState<string>("");

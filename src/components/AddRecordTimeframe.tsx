@@ -8,6 +8,7 @@ type Props = {
   recordName: string;
   callback: any;
 };
+
 export const AddRecordTimeframe = (props: Props) => {
   const [timeframeName, setTimeframeName] = useState<string>("");
   const [timeframeValue, setTimeframeValue] = useState<number>(0);

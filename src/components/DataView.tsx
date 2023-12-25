@@ -1,28 +1,31 @@
-import {
-    DataGrid,
-    GridColDef,
-    GridEventListener
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridEventListener } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 type Props = {
   data: any;
-  callback:any;
+  callback: any;
 };
 
 export const DataView = (props: Props) => {
   const [rows, setRows] = useState<any[]>([]);
   const [columns, setColumns] = useState<GridColDef[]>([]);
 
-
   useEffect(() => {
     if (props.data?.recordList) {
       const data = props.data.recordList[0];
       let columns: GridColDef[] = [];
       for (const item of data.fields) {
-        columns.push({ field: item.element, headerName: item.element });
+        columns.push({
+          field: item.element,
+          headerName: item.element,
+          headerClassName: "fs-6 text-decoration-underline",
+        });
       }
       for (const item of data.values) {
-        columns.push({ field: item.element, headerName: item.element });
+        columns.push({
+          field: item.element,
+          headerName: item.element,
+          headerClassName: "fs-6 text-decoration-underline",
+        });
       }
 
       let rows = [];
@@ -34,7 +37,7 @@ export const DataView = (props: Props) => {
           row[item.element] = item.value;
         }
         for (const item of record.values) {
-          row[item.element] = item.value;
+          row[item.element] = item.value.toFixed(2);
         }
         rows.push(row);
         id += 1;
@@ -45,7 +48,7 @@ export const DataView = (props: Props) => {
   }, [props.data]);
 
   const handleRowClick: GridEventListener<"rowClick"> = (params) => {
-    props.callback(Number(params.row.id))
+    props.callback(Number(params.row.id));
   };
 
   return (
@@ -59,6 +62,7 @@ export const DataView = (props: Props) => {
           },
         }}
         onRowClick={handleRowClick}
+        checkboxSelection
       />
     </div>
   );

@@ -1,15 +1,14 @@
 import { Route, Routes } from "react-router-dom";
-import { TableView } from "../pages/TableView";
 import { Header } from "../components/Header";
+import { TableView } from "../pages/TableView";
 
 export const AppRoutes = () => {
   return (
     <>
-    <Header/>
+      <Header />
       <Routes>
         <Route path="/" element={<TableView />} />
       </Routes>
     </>
-    
   );
 };
