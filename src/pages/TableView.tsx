@@ -2,16 +2,12 @@ import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import axios from "axios";
 import { useEffect, useState } from "react";
-import {
-  Accordion,
-  Modal,
-  Offcanvas,
-  Table
-} from "react-bootstrap";
+import { Accordion, Modal, Offcanvas, Table } from "react-bootstrap";
 import { AddRecord } from "../components/AddRecord";
 import { AddRecordTimeframe } from "../components/AddRecordTimeframe";
 import { EditRecord } from "../components/EditRecord";
 import { BASE_URL } from "../env";
+import { DataView } from "../components/DataView";
 
 export const TableView = () => {
   const [showCanvas, setShowCanvas] = useState<boolean>(false);
@@ -101,7 +97,7 @@ export const TableView = () => {
       <div className="d-flex justify-content-center m-3 p-3">
         <div className="w-100">
           <div className="d-flex justify-content-between mb-3">
-            <h4>Table name</h4>
+            <h4>Record List</h4>
             <button
               type="button"
               className="btn btn-dark"
@@ -112,86 +108,14 @@ export const TableView = () => {
           </div>
           <Accordion defaultActiveKey="0" className="mb-4">
             {data.map((record: any, index: number) => (
-              <Accordion.Item eventKey={record.recordName} key={index}>
+              <Accordion.Item
+                eventKey={record.recordName}
+                key={index}
+                className="record-accordion"
+              >
                 <Accordion.Header>{record.recordName}</Accordion.Header>
                 <Accordion.Body>
-                  <Table bordered hover>
-                    <thead className="table-dark">
-                      <tr>
-                        {record.recordList[0].fields?.map(
-                          (field: any, index: number) => (
-                            <th key={index}>{field.element}</th>
-                          )
-                        )}
-                        {record.recordList[0].values?.map(
-                          (field: any, index: number) => (
-                            <th key={index}>{field.element}</th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {record.recordList?.map((row: any, index: number) => (
-                        <tr
-                          key={index}
-                          onClick={(e) => handleEditClick(row.id)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          {row.fields?.map((field: any, index: number) => (
-                            <td key={index}>{field.value}</td>
-                          ))}
-                          {row.values?.map((field: any, index: number) => (
-                            <td key={index}>{field.value}</td>
-                          ))}
-                        </tr>
-                      ))}
-                      {sumData &&
-                        Object.keys(
-                          sumData.groupedTotalByTimeframe[record.recordName]
-                        ).map((group, index) => {
-                          const ob =
-                            sumData.groupedTotalByTimeframe[record.recordName];
-                          return (
-                            <tr key={index} className="table-info">
-                              <td
-                                colSpan={
-                                  Object.keys(record.recordList[0].fields)
-                                    .length
-                                }
-                              >
-                                Total By Group: {group}
-                              </td>
-                              {Object.keys(ob[group]).map(
-                                (timeframe, index) => (
-                                  <td>{ob[group][timeframe]}</td>
-                                )
-                              )}
-                            </tr>
-                          );
-                        })}
-                      <tr className="table-info">
-                        <td
-                          colSpan={
-                            Object.keys(record.recordList[0].fields).length
-                          }
-                        >
-                          Record Total
-                        </td>
-                        {sumData &&
-                          Object.keys(
-                            sumData.recordNameTotalByTimeframe[
-                              record.recordName
-                            ]
-                          ).map((timeframe, index) => {
-                            const ob =
-                              sumData.recordNameTotalByTimeframe[
-                                record.recordName
-                              ];
-                            return <td>{ob[timeframe]}</td>;
-                          })}
-                      </tr>
-                    </tbody>
-                  </Table>
+                  <DataView data={record} callback={handleEditClick} />
                   <button
                     className="btn btn-primary"
                     onClick={() => handleAddTimeframe(record.recordName)}
