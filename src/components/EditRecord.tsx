@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { BASE_URL } from "../env";
-import axios from "axios";
-import { Button, Col, Form, Row } from "react-bootstrap";
 import { TextField } from "@mui/material";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { BASE_URL } from "../env";
 
 type Props = {
   id: number;
@@ -12,6 +12,7 @@ export const EditRecord = (props: Props) => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [recordName, setRecordName] = useState<string>("");
   const [recordId, setRecordId] = useState<number>(0);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const [dimensions, setDimensions] = useState([{ element: "", value: "" }]);
 
@@ -117,6 +118,13 @@ export const EditRecord = (props: Props) => {
     record.fields = dimensions;
     record.values = timeframes;
     await axios.put(BASE_URL + "/updateRecord", record).then((response) => {
+      props.callback();
+    });
+  };
+
+  const handleDelete = async (e: any) => {
+    e.preventDefault();
+    await axios.delete(BASE_URL + "/records/" + recordId).then((response) => {
       props.callback();
     });
   };
@@ -258,8 +266,41 @@ export const EditRecord = (props: Props) => {
           >
             Update
           </Button>
+          <Button
+            variant="danger"
+            className="w-100 mb-1 mt-3"
+            onClick={() => setShowModal(true)}
+          >
+            Delete Record
+          </Button>
         </div>
       </Form>
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton style={{ border: "none" }}>
+          <Modal.Title>Delete Record</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-flex justify-content-center">
+            <span className="text-center" style={{ fontSize: 17.5 }}>
+              Are you sure you want to delete this record?
+            </span>
+          </div>
+          <div className="d-flex justify-content-center my-2 mt-4">
+            <button
+              className="btn btn-danger mx-3 px-5"
+              onClick={(e) => handleDelete(e)}
+            >
+              Delete
+            </button>
+            <button
+              className="btn btn-secondary mx-3 px-5"
+              onClick={() => props.callback()}
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal.Body>
+      </Modal>
     </>
   );
 };

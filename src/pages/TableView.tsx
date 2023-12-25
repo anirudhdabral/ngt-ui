@@ -2,12 +2,21 @@ import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Accordion, Offcanvas, Table } from "react-bootstrap";
+import {
+  Accordion,
+  Modal,
+  Offcanvas,
+  Table
+} from "react-bootstrap";
 import { AddRecord } from "../components/AddRecord";
+import { AddRecordTimeframe } from "../components/AddRecordTimeframe";
 import { EditRecord } from "../components/EditRecord";
 import { BASE_URL } from "../env";
 
 export const TableView = () => {
+  const [showCanvas, setShowCanvas] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [canvasItem, setCanvasItem] = useState<"ADD" | "EDIT">("ADD");
   const [data, setData] = useState<any>([]);
   const [sumData, setSumData] = useState<any>();
 
@@ -63,8 +72,6 @@ export const TableView = () => {
     }
   }, [data]);
 
-  const [showCanvas, setShowCanvas] = useState<boolean>(false);
-  const [canvasItem, setCanvasItem] = useState<"ADD" | "EDIT">("ADD");
   const handleAddClick = () => {
     setCanvasItem("ADD");
     setShowCanvas(true);
@@ -80,19 +87,18 @@ export const TableView = () => {
     setShowCanvas(false);
   };
 
-  const handleAddTimeframe = (recordName: string) => {};
+  const handleAddTimeframe = (recordName: string) => {
+    setActionRecordName(recordName);
+    setShowModal(true);
+  };
 
   const handleRecordChangeCallback = () => {
-    // handleClose();
-    // getAllRecordNames();
-    // getSumData();
-
     window.location.reload();
   };
 
   return (
     <>
-      <div className="d-flex justify-content-center m-3 p-3 mt-5 pt-5">
+      <div className="d-flex justify-content-center m-3 p-3">
         <div className="w-100">
           <div className="d-flex justify-content-between mb-3">
             <h4>Table name</h4>
@@ -241,6 +247,17 @@ export const TableView = () => {
           )}
         </Offcanvas.Body>
       </Offcanvas>
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton style={{ border: "none" }}>
+          <Modal.Title>Add Timeframe</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <AddRecordTimeframe
+            recordName={actionRecordName}
+            callback={() => setShowModal(false)}
+          />
+        </Modal.Body>
+      </Modal>
     </>
   );
 };

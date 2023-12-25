@@ -1,14 +1,14 @@
 import { TextField } from "@mui/material";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
-import axios from "axios";
 import { BASE_URL } from "../env";
 
-type Props={
-  callback:any
-}
+type Props = {
+  callback: any;
+};
 
-export const AddRecord = (props:Props) => {
+export const AddRecord = (props: Props) => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [recordName, setRecordName] = useState<string>("");
 
@@ -117,7 +117,7 @@ export const AddRecord = (props:Props) => {
     record.fields = fields;
     record.values = values;
     await axios.post(BASE_URL + "/addRecord", record).then((response) => {
-      props.callback()
+      props.callback();
     });
   };
   return (

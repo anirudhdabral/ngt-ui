@@ -3,10 +3,8 @@ import { TableView } from "../pages/TableView";
 
 export const AppRoutes = () => {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<TableView />} />
-      </Routes>
-    </>
+    <Routes>
+      <Route path="/" element={<TableView />} />
+    </Routes>
   );
 };
