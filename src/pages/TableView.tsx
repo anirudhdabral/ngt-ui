@@ -44,7 +44,6 @@ export const TableView = () => {
     getAllRecordNames();
     getSumData();
   }, []);
-  
 
   const hasDuplicates = () => {
     const uniqueRecordNames = new Set();

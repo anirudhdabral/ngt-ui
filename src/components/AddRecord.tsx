@@ -120,6 +120,7 @@ export const AddRecord = (props: Props) => {
       props.callback();
     });
   };
+
   return (
     <>
       <Form>

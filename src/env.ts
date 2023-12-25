@@ -1,1 +1,1 @@
-export const BASE_URL = "http://localhost:5055/ngt"
+export const BASE_URL = "http://localhost:5055/ngt";
