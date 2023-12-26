@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
 import { BASE_URL } from "../env";
+import { toast } from "react-toastify";
 
 type Props = {
   callback: any;
@@ -116,9 +117,15 @@ export const AddRecord = (props: Props) => {
     }
     record.fields = fields;
     record.values = values;
-    await axios.post(BASE_URL + "/addRecord", record).then((response) => {
-      props.callback();
-    });
+    await axios
+      .post(BASE_URL + "/addRecord", record)
+      .then((response) => {
+        props.callback();
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+        setTimeout(() => props.callback(), 3100);
+      });
   };
 
   return (

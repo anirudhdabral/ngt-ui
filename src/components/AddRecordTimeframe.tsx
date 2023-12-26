@@ -3,6 +3,7 @@ import axios from "axios";
 import { useState } from "react";
 import { Button, Col } from "react-bootstrap";
 import { BASE_URL } from "../env";
+import { toast } from "react-toastify";
 
 type Props = {
   recordName: string;
@@ -23,7 +24,11 @@ export const AddRecordTimeframe = (props: Props) => {
         timeframeTotalDetails
       )
       .then((response) => {
-        props.callback();
+        props.callback()
+      })
+      .catch((error)=>{
+        toast.error(error.response.data.message)
+        setTimeout(()=>props.callback(),3100)
       });
   };
   return (

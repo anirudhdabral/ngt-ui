@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { BASE_URL } from "../env";
+import { toast } from "react-toastify";
 
 type Props = {
   id: number;
@@ -118,16 +119,28 @@ export const EditRecord = (props: Props) => {
     record.recordName = recordName;
     record.fields = dimensions;
     record.values = timeframes;
-    await axios.put(BASE_URL + "/updateRecord", record).then((response) => {
-      props.callback();
-    });
+    await axios
+      .put(BASE_URL + "/updateRecord", record)
+      .then((response) => {
+        props.callback();
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+        setTimeout(() => props.callback(), 3100);
+      });
   };
 
   const handleDelete = async (e: any) => {
     e.preventDefault();
-    await axios.delete(BASE_URL + "/records/" + recordId).then((response) => {
-      props.callback();
-    });
+    await axios
+      .delete(BASE_URL + "/records/" + recordId)
+      .then((response) => {
+        props.callback();
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+        setTimeout(() => props.callback(), 3100);
+      });
   };
 
   return (

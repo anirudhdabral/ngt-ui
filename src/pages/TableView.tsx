@@ -3,6 +3,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Accordion, Modal, Offcanvas, Table } from "react-bootstrap";
+import { toast } from "react-toastify";
 import { AddRecord } from "../components/AddRecord";
 import { AddRecordTimeframe } from "../components/AddRecordTimeframe";
 import { DataView } from "../components/DataView";
@@ -28,16 +29,29 @@ export const TableView = () => {
   };
 
   const getAllByRecordNames = async (recordName: string) => {
-    await axios.get(BASE_URL + "/recordName/" + recordName).then((response) => {
-      const recordData = { recordName: recordName, recordList: response.data };
-      setData((prev: any) => [...prev, recordData]);
-    });
+    await axios
+      .get(BASE_URL + "/recordName/" + recordName)
+      .then((response) => {
+        const recordData = {
+          recordName: recordName,
+          recordList: response.data,
+        };
+        setData((prev: any) => [...prev, recordData]);
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+      });
   };
 
   const getSumData = async () => {
-    await axios.get(BASE_URL + "/getForecastedResults").then((response) => {
-      setSumData(response.data);
-    });
+    await axios
+      .get(BASE_URL + "/getForecastedResults")
+      .then((response) => {
+        setSumData(response.data);
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+      });
   };
 
   useEffect(() => {
