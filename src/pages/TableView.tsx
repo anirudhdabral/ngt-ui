@@ -2,25 +2,28 @@ import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Accordion, Modal, Offcanvas, Table } from "react-bootstrap";
+import { Accordion, Modal, Offcanvas } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { AddGroupTimeframe } from "../components/AddGroupTimeframe";
 import { AddRecord } from "../components/AddRecord";
 import { AddRecordTimeframe } from "../components/AddRecordTimeframe";
 import { DataView } from "../components/DataView";
 import { EditRecord } from "../components/EditRecord";
-import { BASE_URL } from "../env";
-import { GroupTotalDataView } from "../components/GroupTotalDataView";
 import { GrandTotalDataView } from "../components/GrandTotalDataView";
+import { GroupTotalDataView } from "../components/GroupTotalDataView";
+import { BASE_URL } from "../env";
 
 export const TableView = () => {
   const [showCanvas, setShowCanvas] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [canvasItem, setCanvasItem] = useState<"ADD" | "EDIT">("ADD");
+  const [modalItem, setModalItem] = useState<"RECORD" | "GROUP">("RECORD");
   const [data, setData] = useState<any>([]);
   const [sumData, setSumData] = useState<any>();
 
   const [actionId, setActionId] = useState<number>(-1);
   const [actionRecordName, setActionRecordName] = useState<string>("");
+  const [actionGroupName, setActionGroupName] = useState<string>("");
 
   const getAllRecordNames = async () => {
     await axios.get(BASE_URL + "/recordNames").then((response) => {
@@ -100,6 +103,14 @@ export const TableView = () => {
   };
 
   const handleAddTimeframe = (recordName: string) => {
+    setModalItem("RECORD");
+    setActionRecordName(recordName);
+    setShowModal(true);
+  };
+
+  const handleAddGroupTimeframe = (recordName: string, groupName: string) => {
+    setActionGroupName(groupName);
+    setModalItem("GROUP");
     setActionRecordName(recordName);
     setShowModal(true);
   };
@@ -147,14 +158,32 @@ export const TableView = () => {
                     className="btn btn-primary mt-3"
                     onClick={() => handleAddTimeframe(record.recordName)}
                   >
-                    Add a new Timeframe for "{record.recordName}"
+                    Add timeframe for record: {record.recordName}
                   </button>
+                  <br />
+                  {sumData &&
+                    Object.keys(
+                      sumData.groupedTotalByTimeframe[record.recordName]
+                    ).map((group, index) => {
+                      return (
+                        <button
+                        key={index}
+                          className="btn btn-outline-primary mt-3"
+                          style={{ marginRight: 15 }}
+                          onClick={() =>
+                            handleAddGroupTimeframe(record.recordName, group)
+                          }
+                        >
+                          Add timeframe for group: {group}
+                        </button>
+                      );
+                    })}
                 </Accordion.Body>
               </Accordion.Item>
             ))}
           </Accordion>
           <h4 className="mt-5">Grand Total</h4>
-          <GrandTotalDataView sumData={sumData}/>
+          <GrandTotalDataView sumData={sumData} />
         </div>
       </div>
       <Offcanvas
@@ -181,10 +210,18 @@ export const TableView = () => {
           <Modal.Title>Add Timeframe</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <AddRecordTimeframe
-            recordName={actionRecordName}
-            callback={handleAddTimeframeCallback}
-          />
+          {modalItem === "RECORD" ? (
+            <AddRecordTimeframe
+              recordName={actionRecordName}
+              callback={handleAddTimeframeCallback}
+            />
+          ) : (
+            <AddGroupTimeframe
+              recordName={actionRecordName}
+              callback={handleAddTimeframeCallback}
+              groupName={actionGroupName}
+            />
+          )}
         </Modal.Body>
       </Modal>
     </>
