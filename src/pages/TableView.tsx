@@ -9,6 +9,8 @@ import { AddRecordTimeframe } from "../components/AddRecordTimeframe";
 import { DataView } from "../components/DataView";
 import { EditRecord } from "../components/EditRecord";
 import { BASE_URL } from "../env";
+import { GroupTotalDataView } from "../components/GroupTotalDataView";
+import { GrandTotalDataView } from "../components/GrandTotalDataView";
 
 export const TableView = () => {
   const [showCanvas, setShowCanvas] = useState<boolean>(false);
@@ -135,68 +137,14 @@ export const TableView = () => {
                 <Accordion.Header>{record.recordName}</Accordion.Header>
                 <Accordion.Body>
                   <DataView data={record} callback={handleEditClick} />
-                  <Table bordered hover>
-                    <thead className="table-dark">
-                      <tr>
-                        <th colSpan={record.recordList[0].fields?.length}></th>
-
-                        {record.recordList[0].values?.map(
-                          (field: any, index: number) => (
-                            <th key={index}>{field.element}</th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sumData &&
-                        Object.keys(
-                          sumData.groupedTotalByTimeframe[record.recordName]
-                        ).map((group, index) => {
-                          const ob =
-                            sumData.groupedTotalByTimeframe[record.recordName];
-                          return (
-                            <tr key={index} className="table-info">
-                              <td
-                                colSpan={
-                                  Object.keys(record.recordList[0].fields)
-                                    .length
-                                }
-                              >
-                                Total By Group: {group}
-                              </td>
-                              {Object.keys(ob[group]).map(
-                                (timeframe, index) => (
-                                  <td>{ob[group][timeframe].toFixed(2)}</td>
-                                )
-                              )}
-                            </tr>
-                          );
-                        })}
-                      <tr className="table-info">
-                        <td
-                          colSpan={
-                            Object.keys(record.recordList[0].fields).length
-                          }
-                        >
-                          Record Total
-                        </td>
-                        {sumData &&
-                          Object.keys(
-                            sumData.recordNameTotalByTimeframe[
-                              record.recordName
-                            ]
-                          ).map((timeframe, index) => {
-                            const ob =
-                              sumData.recordNameTotalByTimeframe[
-                                record.recordName
-                              ];
-                            return <td>{ob[timeframe].toFixed(2)}</td>;
-                          })}
-                      </tr>
-                    </tbody>
-                  </Table>
+                  <h6 className="mt-4">Record Total Data</h6>
+                  <GroupTotalDataView
+                    recordList={record.recordList}
+                    sumData={sumData}
+                    recordName={record.recordName}
+                  />
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary mt-3"
                     onClick={() => handleAddTimeframe(record.recordName)}
                   >
                     Add a new Timeframe for "{record.recordName}"
@@ -205,36 +153,8 @@ export const TableView = () => {
               </Accordion.Item>
             ))}
           </Accordion>
-          <Table bordered>
-            <thead className="table-success">
-              <tr>
-                {sumData && (
-                  <th
-                    colSpan={Object.keys(sumData.grandTotalByTimeframe).length}
-                    className="text-center"
-                  >
-                    Grand Total by Timeframe
-                  </th>
-                )}
-              </tr>
-              <tr>
-                {sumData &&
-                  Object.keys(sumData.grandTotalByTimeframe).map(
-                    (year, index) => <th>{year}</th>
-                  )}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                {sumData &&
-                  Object.keys(sumData.grandTotalByTimeframe).map(
-                    (year, index) => (
-                      <td>{sumData.grandTotalByTimeframe[year].toFixed(2)}</td>
-                    )
-                  )}
-              </tr>
-            </tbody>
-          </Table>
+          <h4 className="mt-5">Grand Total</h4>
+          <GrandTotalDataView sumData={sumData}/>
         </div>
       </div>
       <Offcanvas

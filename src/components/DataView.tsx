@@ -18,6 +18,7 @@ export const DataView = (props: Props) => {
           field: item.element,
           headerName: item.element,
           headerClassName: "fs-6 text-decoration-underline",
+          width: 150
         });
       }
       for (const item of data.values) {
